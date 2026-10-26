@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Icon from "../Icon";
 import modules from "../../data/modules";
 
@@ -48,7 +49,13 @@ export default function ModulesSection() {
               </summary>
               <div className="module-detail">
                 <p>{module.detail}</p>
-                <span>Exploration des données à venir</span>
+                <Link
+                  className="button module-open-button"
+                  to={`/modules/${module.slug}`}
+                  aria-label={`Ouvrir le module ${module.name}`}
+                >
+                  Explorer ce module <Icon name="arrow" size={17} />
+                </Link>
               </div>
             </details>
           ))}

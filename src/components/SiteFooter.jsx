@@ -11,7 +11,7 @@ export default function SiteFooter() {
           <br />
           <strong>Éclairer l’énergie.</strong>
         </p>
-        <a className="back-top" href="#accueil">
+        <a className="back-top" href="/#accueil">
           Retour en haut <span>↑</span>
         </a>
       </div>

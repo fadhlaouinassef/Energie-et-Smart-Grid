@@ -1580,3 +1580,20 @@ section {
     will-change: transform;
   }
 }
+
+/* Home module links and programmatic route focus. */
+.module-open-button {
+  border: 1px solid #b9cba5;
+  background: #e0eaca;
+  color: var(--ink);
+  font-size: 12px;
+  margin-top: 18px;
+  padding: 12px 19px;
+}
+.module-open-button:hover {
+  background: var(--lime);
+}
+
+#contenu:focus {
+  outline: none;
+}

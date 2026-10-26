@@ -1,9 +1,11 @@
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import Icon from "./Icon";
 import Brand from "./Brand";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const isHome = useLocation().pathname === "/";
 
   return (
     <header className="site-header">
@@ -14,20 +16,21 @@ export default function SiteHeader() {
         aria-label="Navigation principale"
       >
         <a
-          href="#accueil"
-          className="nav-home"
+          href="/#accueil"
+          className={isHome ? "nav-home" : undefined}
+          aria-current={isHome ? "page" : undefined}
           onClick={() => setMenuOpen(false)}
         >
           Accueil
         </a>
-        <a href="#projet" onClick={() => setMenuOpen(false)}>
+        <a href="/#projet" onClick={() => setMenuOpen(false)}>
           Le projet
         </a>
-        <a href="#modules" onClick={() => setMenuOpen(false)}>
+        <a href="/#modules" onClick={() => setMenuOpen(false)}>
           Modules
         </a>
       </nav>
-      <a className="button button-dark nav-explore" href="#modules">
+      <a className="button button-dark nav-explore" href="/#modules">
         Explorer <Icon name="diagonal" size={16} />
       </a>
       <button

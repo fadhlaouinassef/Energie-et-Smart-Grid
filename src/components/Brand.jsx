@@ -4,7 +4,7 @@ export default function Brand() {
   return (
     <a
       className="brand"
-      href="#accueil"
+      href="/#accueil"
       aria-label="Énergie & Smart Grid — Accueil"
     >
       <span className="brand-symbol">
