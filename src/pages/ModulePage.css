@@ -417,6 +417,111 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.conversation--connected {
+  max-height: 580px;
+  align-items: stretch;
+}
+.conversation-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.conversation-turn > .user-message {
+  align-self: flex-end;
+}
+.assistant-message {
+  padding: 18px;
+  border: 1px solid var(--module-border);
+  border-radius: 13px 13px 13px 3px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+.response-notice {
+  font-size: 14px;
+  line-height: 1.7;
+}
+.response-error {
+  color: #a12828;
+  border-left: 3px solid #a12828;
+  padding-left: 12px;
+}
+.resource-results {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+.resource-result {
+  padding: 15px;
+  border: 1px solid var(--module-border);
+  border-radius: 10px;
+  background: var(--module-soft);
+  min-width: 0;
+}
+.resource-result h3 {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.resource-identifier {
+  margin-top: 4px;
+  color: var(--module-muted);
+  font: 11px/1.7 monospace;
+  overflow-wrap: anywhere;
+}
+.resource-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+.resource-types span {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--module-tint);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.resource-details {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.resource-details summary {
+  cursor: pointer;
+  color: var(--module-accent);
+  padding-block: 4px;
+}
+.resource-details dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 14px;
+  padding-block: 9px;
+  border-top: 1px solid var(--module-border);
+}
+.resource-details dt {
+  color: var(--module-muted);
+}
+.resource-details dd {
+  margin: 0;
+  min-width: 0;
+}
+.resource-details ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.resource-details li + li {
+  margin-top: 5px;
+}
+@media (max-width: 650px) {
+  .assistant-message {
+    padding: 13px;
+  }
+  .resource-details dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+}
 .module-page-footer {
   display: flex;
   justify-content: space-between;

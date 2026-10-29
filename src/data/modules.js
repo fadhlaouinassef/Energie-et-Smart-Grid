@@ -22,9 +22,9 @@ const modules = [
     theme: "network",
     headline: "Explorez les connexions.",
     suggestions: [
-      "Quels transformateurs sont reliés à ce réseau ?",
-      "Quelles lignes alimentent ce bâtiment ?",
-      "Comment les infrastructures sont-elles connectées ?",
+      "Affiche les réseaux à Tunis",
+      "Liste les transformateurs",
+      "Affiche les lignes haute tension",
     ],
     icon: "grid",
     tag: "CONNECTER",
