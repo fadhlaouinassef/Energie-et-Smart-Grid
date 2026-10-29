@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import modules from "../data/modules";
 import SiteHeader from "../components/SiteHeader";
+import ActeursWorkspace from "../features/acteurs/ActeursWorkspace";
 import Icon from "../components/Icon";
 import MessageComposer from "../components/modules/MessageComposer";
 import ModuleNavigation from "../components/modules/ModuleNavigation";
@@ -43,7 +44,11 @@ export default function ModulePage() {
               <span>0{index}</span>
             </div>
           </div>
-          <MessageComposer key={module.slug} module={module} />
+          {slug === "acteurs-organisations" ? (
+            <ActeursWorkspace module={module} />
+          ) : (
+            <MessageComposer key={module.slug} module={module} />
+          )}
           <div className="module-page-footer">
             <span>ÉNERGIE & SMART GRID</span>
             <span>Des données reliées. Des questions éclairées.</span>
