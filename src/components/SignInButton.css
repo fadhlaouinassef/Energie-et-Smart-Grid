@@ -1,0 +1,29 @@
+.nav-signin {
+  padding: 12px 22px;
+  font-size: 12px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  /* rapproche le bouton de « Explorer » (l'en-tête laisse 32 px entre ses éléments) */
+  margin-right: -18px;
+}
+.nav-signin:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+@media (max-width: 580px) {
+  .nav-signin {
+    margin-left: auto;
+    margin-right: 0;
+    padding: 10px 16px;
+    font-size: 11px;
+  }
+  .nav-signin + .nav-explore {
+    margin-left: 0;
+  }
+}
+@media (max-width: 480px) {
+  /* « Explorer » fait doublon avec le lien Modules du menu : on garde la place pour Sign in */
+  .nav-signin + .nav-explore {
+    display: none;
+  }
+}

@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import Icon from "./Icon";
 import Brand from "./Brand";
+import SignInButton from "./SignInButton";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,6 +31,7 @@ export default function SiteHeader() {
           Modules
         </a>
       </nav>
+      <SignInButton />
       <a className="button button-dark nav-explore" href="/#modules">
         Explorer <Icon name="diagonal" size={16} />
       </a>
