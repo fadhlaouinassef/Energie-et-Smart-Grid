@@ -4,6 +4,7 @@ import ModulePattern from "./ModulePattern";
 import NetworkResponse from "./NetworkResponse";
 import { getRequestError, sendNetworkPrompt } from "../../services/networkApi";
 import { getPlacesError, sendPlacesTransportPrompt } from "../../services/lieuxTransportsApi";
+import { sendEquipementsPrompt } from "../../services/equipementsApi";
 
 const MAX_LENGTH = 2000;
 
@@ -11,14 +12,20 @@ export default function MessageComposer({ module }) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState([]);
   const [isSending, setIsSending] = useState(false);
-  const connectedModules = ["production-stockage", "reseaux-infrastructures", "lieux-transports"];
+  const connectedModules = ["production-stockage", "reseaux-infrastructures", "lieux-transports", "equipements-suivi"];
   const isConnected = connectedModules.includes(module.slug);
   const moduleHelpMap = {
+    "equipements-suivi": "Consultez ou gérez les équipements et les informations. Exemples : Liste les équipements · Affiche les mesures · Liste les incidents.",
     "production-stockage": "Envoyez votre demande pour consulter les installations de production et les réserves de stockage.",
     "reseaux-infrastructures": "Envoyez votre demande pour consulter ou gérer les réseaux et infrastructures.",
     "lieux-transports": "Posez une question sur les lieux, bâtiments, sites ou transports (ex. : Affiche les lieux à Tunis · Liste les acheminements).",
   };
   const moduleHelp = moduleHelpMap[module.slug] ?? "Envoyez votre demande.";
+  const suggestions = module.slug === "equipements-suivi"
+    ? ["Liste les équipements", "Affiche les mesures", "Liste les incidents"]
+    : module.slug === "lieux-transports"
+      ? ["Affiche les sites", "Liste les bâtiments", "Liste les transports"]
+      : module.suggestions;
   const request = useRef(null);
   const textarea = useRef(null);
   const latestMessage = useRef(null);
@@ -41,9 +48,9 @@ export default function MessageComposer({ module }) {
 
   useEffect(() => () => request.current?.abort(), []);
 
-  async function submit(event) {
-    event.preventDefault();
-    const content = draft.trim();
+  async function submit(event, suggestion) {
+    event?.preventDefault();
+    const content = (suggestion ?? draft).trim();
     if (!content || request.current) return;
     const messageId = crypto.randomUUID();
     setMessages((previous) => [
@@ -58,7 +65,9 @@ export default function MessageComposer({ module }) {
     request.current = controller;
     setIsSending(true);
     // Dispatch vers le bon service NLP selon le module.
-    const sendPrompt = module.slug === "lieux-transports"
+    const sendPrompt = module.slug === "equipements-suivi"
+      ? sendEquipementsPrompt
+      : module.slug === "lieux-transports"
       ? sendPlacesTransportPrompt
       : sendNetworkPrompt;
     const getError = module.slug === "lieux-transports"
@@ -85,6 +94,10 @@ export default function MessageComposer({ module }) {
   }
 
   function chooseSuggestion(suggestion) {
+    if (module.slug === "lieux-transports") {
+      void submit(null, suggestion);
+      return;
+    }
     setDraft(suggestion);
     textarea.current.focus();
   }
@@ -157,7 +170,7 @@ export default function MessageComposer({ module }) {
               )
                 submit(event);
             }}
-            placeholder={module.suggestions[0]}
+            placeholder={suggestions[0]}
             maxLength={MAX_LENGTH}
             rows={4}
             aria-describedby={`${helpId} ${countId}`}
@@ -193,11 +206,12 @@ export default function MessageComposer({ module }) {
       <div className="suggestions">
         <span className="suggestions-label">POUR COMMENCER</span>
         <div>
-          {module.suggestions.map((suggestion) => (
+          {suggestions.map((suggestion) => (
             <button
               type="button"
               key={suggestion}
               onClick={() => chooseSuggestion(suggestion)}
+              disabled={module.slug === "lieux-transports" && isSending}
             >
               {suggestion}
               <Icon name="diagonal" size={14} />
