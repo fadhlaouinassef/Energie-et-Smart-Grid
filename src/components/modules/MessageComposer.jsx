@@ -3,6 +3,7 @@ import Icon from "../Icon";
 import ModulePattern from "./ModulePattern";
 import NetworkResponse from "./NetworkResponse";
 import { getRequestError, sendNetworkPrompt } from "../../services/networkApi";
+import { getPlacesError, sendPlacesTransportPrompt } from "../../services/lieuxTransportsApi";
 
 const MAX_LENGTH = 2000;
 
@@ -10,11 +11,14 @@ export default function MessageComposer({ module }) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState([]);
   const [isSending, setIsSending] = useState(false);
-  const connectedModules = ["production-stockage", "reseaux-infrastructures"];
+  const connectedModules = ["production-stockage", "reseaux-infrastructures", "lieux-transports"];
   const isConnected = connectedModules.includes(module.slug);
-  const moduleHelp = module.slug === "production-stockage"
-    ? "Envoyez votre demande pour consulter les installations de production et les réserves de stockage."
-    : "Envoyez votre demande pour consulter ou gérer les réseaux et infrastructures.";
+  const moduleHelpMap = {
+    "production-stockage": "Envoyez votre demande pour consulter les installations de production et les réserves de stockage.",
+    "reseaux-infrastructures": "Envoyez votre demande pour consulter ou gérer les réseaux et infrastructures.",
+    "lieux-transports": "Posez une question sur les lieux, bâtiments, sites ou transports (ex. : Affiche les lieux à Tunis · Liste les acheminements).",
+  };
+  const moduleHelp = moduleHelpMap[module.slug] ?? "Envoyez votre demande.";
   const request = useRef(null);
   const textarea = useRef(null);
   const latestMessage = useRef(null);
@@ -53,8 +57,15 @@ export default function MessageComposer({ module }) {
     const controller = new AbortController();
     request.current = controller;
     setIsSending(true);
+    // Dispatch vers le bon service NLP selon le module.
+    const sendPrompt = module.slug === "lieux-transports"
+      ? sendPlacesTransportPrompt
+      : sendNetworkPrompt;
+    const getError = module.slug === "lieux-transports"
+      ? getPlacesError
+      : getRequestError;
     try {
-      const result = await sendNetworkPrompt(content, controller.signal);
+      const result = await sendPrompt(content, controller.signal);
       if (!controller.signal.aborted) {
         setMessages((previous) => previous.map((message) => message.id === messageId
           ? { ...message, status: "success", result } : message));
@@ -62,7 +73,7 @@ export default function MessageComposer({ module }) {
     } catch (error) {
       if (!controller.signal.aborted) {
         setMessages((previous) => previous.map((message) => message.id === messageId
-          ? { ...message, status: "error", error: getRequestError(error) } : message));
+          ? { ...message, status: "error", error: getError(error) } : message));
         setDraft((current) => current || content);
       }
     } finally {
