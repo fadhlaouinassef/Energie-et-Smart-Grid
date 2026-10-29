@@ -1,5 +1,6 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import modules from "../data/modules";
+import { signOut } from "../auth";
 import SiteHeader from "../components/SiteHeader";
 import ActeursWorkspace from "../features/acteurs/ActeursWorkspace";
 import Icon from "../components/Icon";
@@ -11,8 +12,14 @@ import "./ModulePage.css";
 
 export default function ModulePage() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const module = modules.find((item) => item.slug === slug);
   if (!module) return <NotFoundPage />;
+
+  function logout() {
+    signOut();
+    navigate("/signin", { replace: true });
+  }
   const index = modules.indexOf(module) + 1;
 
   return (
@@ -28,7 +35,12 @@ export default function ModulePage() {
             <a href="/#modules">
               <span aria-hidden="true">←</span> Tous les modules
             </a>
-            <span>MODULE 0{index} / 05</span>
+            <div className="module-breadcrumb-end">
+              <span>MODULE 0{index} / 05</span>
+              <button type="button" className="module-logout" onClick={logout}>
+                Déconnexion
+              </button>
+            </div>
           </div>
           <ModuleNavigation activeSlug={slug} />
           <div className="module-intro">

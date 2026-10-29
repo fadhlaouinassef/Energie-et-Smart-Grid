@@ -10,7 +10,7 @@ export default function RouteEffects() {
     document.title =
       pathname === "/"
         ? "Énergie & Smart Grid — Les données éclairées"
-        : `${module?.name ?? "Page introuvable"} — Énergie & Smart Grid`;
+        : `${pathname === "/signin" ? "Connexion" : (module?.name ?? "Page introuvable")} — Énergie & Smart Grid`;
     const frame = requestAnimationFrame(() => {
       const anchor = hash ? document.getElementById(hash.slice(1)) : null;
       if (anchor) anchor.scrollIntoView({ behavior: "instant" });
