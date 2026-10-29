@@ -10,7 +10,11 @@ export default function MessageComposer({ module }) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState([]);
   const [isSending, setIsSending] = useState(false);
-  const isConnected = module.slug === "reseaux-infrastructures";
+  const connectedModules = ["production-stockage", "reseaux-infrastructures"];
+  const isConnected = connectedModules.includes(module.slug);
+  const moduleHelp = module.slug === "production-stockage"
+    ? "Envoyez votre demande pour consulter les installations de production et les réserves de stockage."
+    : "Envoyez votre demande pour consulter ou gérer les réseaux et infrastructures.";
   const request = useRef(null);
   const textarea = useRef(null);
   const latestMessage = useRef(null);
@@ -155,7 +159,7 @@ export default function MessageComposer({ module }) {
           <p id={helpId}>
             <Icon name="link" size={16} />
             <span>
-              {isConnected ? "Envoyez votre demande pour consulter ou gérer les réseaux et infrastructures." : "Assistant non connecté."}
+              {isConnected ? moduleHelp : "Assistant non connecté."}
               <br />
               Vos questions restent ici tant que ce module est ouvert.
             </span>
