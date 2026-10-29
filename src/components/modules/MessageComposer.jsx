@@ -1,12 +1,25 @@
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import Icon from "../Icon";
 import ModulePattern from "./ModulePattern";
+import NetworkResponse from "./NetworkResponse";
+import { getRequestError, sendNetworkPrompt } from "../../services/networkApi";
+import { getPlacesError, sendPlacesTransportPrompt } from "../../services/lieuxTransportsApi";
 
 const MAX_LENGTH = 2000;
 
 export default function MessageComposer({ module }) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isSending, setIsSending] = useState(false);
+  const connectedModules = ["production-stockage", "reseaux-infrastructures", "lieux-transports"];
+  const isConnected = connectedModules.includes(module.slug);
+  const moduleHelpMap = {
+    "production-stockage": "Envoyez votre demande pour consulter les installations de production et les réserves de stockage.",
+    "reseaux-infrastructures": "Envoyez votre demande pour consulter ou gérer les réseaux et infrastructures.",
+    "lieux-transports": "Posez une question sur les lieux, bâtiments, sites ou transports (ex. : Affiche les lieux à Tunis · Liste les acheminements).",
+  };
+  const moduleHelp = moduleHelpMap[module.slug] ?? "Envoyez votre demande.";
+  const request = useRef(null);
   const textarea = useRef(null);
   const latestMessage = useRef(null);
   const id = useId();
@@ -24,18 +37,51 @@ export default function MessageComposer({ module }) {
     // Scroll within the conversation only; never move the entire page on send.
     const conversation = latestMessage.current?.parentElement;
     if (conversation) conversation.scrollTop = conversation.scrollHeight;
-  }, [messages.length]);
+  }, [messages]);
 
-  function submit(event) {
+  useEffect(() => () => request.current?.abort(), []);
+
+  async function submit(event) {
     event.preventDefault();
     const content = draft.trim();
-    if (!content) return;
+    if (!content || request.current) return;
+    const messageId = crypto.randomUUID();
     setMessages((previous) => [
       ...previous,
-      { id: crypto.randomUUID(), content },
+      { id: messageId, content, status: isConnected ? "loading" : "local" },
     ]);
     setDraft("");
     textarea.current.focus();
+    if (!isConnected) return;
+
+    const controller = new AbortController();
+    request.current = controller;
+    setIsSending(true);
+    // Dispatch vers le bon service NLP selon le module.
+    const sendPrompt = module.slug === "lieux-transports"
+      ? sendPlacesTransportPrompt
+      : sendNetworkPrompt;
+    const getError = module.slug === "lieux-transports"
+      ? getPlacesError
+      : getRequestError;
+    try {
+      const result = await sendPrompt(content, controller.signal);
+      if (!controller.signal.aborted) {
+        setMessages((previous) => previous.map((message) => message.id === messageId
+          ? { ...message, status: "success", result } : message));
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setMessages((previous) => previous.map((message) => message.id === messageId
+          ? { ...message, status: "error", error: getError(error) } : message));
+        setDraft((current) => current || content);
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        request.current = null;
+        setIsSending(false);
+      }
+    }
   }
 
   function chooseSuggestion(suggestion) {
@@ -55,25 +101,40 @@ export default function MessageComposer({ module }) {
           <p>Explorez le module en langage naturel.</p>
         </div>
         <span className="composer-status">
-          <span /> Assistant à venir
+          <span /> {isConnected ? "Assistant du module" : "Assistant à venir"}
         </span>
       </div>
 
       {messages.length > 0 && (
         <div
-          className="conversation"
+          className={`conversation${isConnected ? " conversation--connected" : ""}`}
           role="region"
-          aria-label="Vos questions dans ce module"
+          aria-label="Conversation dans ce module"
           tabIndex={0}
         >
           {messages.map((message, index) => (
             <div
-              className="user-message"
+              className={isConnected ? "conversation-turn" : "user-message"}
               key={message.id}
               ref={index === messages.length - 1 ? latestMessage : undefined}
             >
-              <span className="message-author">Vous</span>
-              <p>{message.content}</p>
+              {isConnected ? (
+                <>
+                  <div className="user-message">
+                    <span className="message-author">Vous</span>
+                    <p>{message.content}</p>
+                  </div>
+                  <div className="assistant-message" aria-busy={message.status === "loading"}>
+                    <span className="message-author">Assistant</span>
+                    <NetworkResponse message={message} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="message-author">Vous</span>
+                  <p>{message.content}</p>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -109,7 +170,7 @@ export default function MessageComposer({ module }) {
           <p id={helpId}>
             <Icon name="link" size={16} />
             <span>
-              Assistant non connecté.
+              {isConnected ? moduleHelp : "Assistant non connecté."}
               <br />
               Vos questions restent ici tant que ce module est ouvert.
             </span>
@@ -117,15 +178,15 @@ export default function MessageComposer({ module }) {
           <button
             type="submit"
             className="button composer-submit"
-            disabled={!draft.trim()}
+            disabled={!draft.trim() || isSending}
           >
-            Ajouter ma question <Icon name="arrow" size={18} />
+            {isConnected ? (isSending ? "Envoi en cours…" : "Envoyer ma demande") : "Ajouter ma question"} <Icon name="arrow" size={18} />
           </button>
         </div>
       </form>
 
       <p className="composer-feedback" role="status">
-        {messages.length > 0
+        {!isConnected && messages.length > 0
           ? `Question ${messages.length} ajoutée localement. Les réponses de l’assistant ne sont pas encore disponibles.`
           : ""}
       </p>
