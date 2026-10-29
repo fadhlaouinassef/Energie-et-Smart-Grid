@@ -5,9 +5,9 @@ const modules = [
     theme: "production",
     headline: "De la source à la réserve.",
     suggestions: [
-      "Quelles installations produisent de l’énergie solaire ?",
-      "Quels systèmes de stockage sont disponibles ?",
-      "Quelles batteries sont reliées à cette installation ?",
+      "Affiche les installation",
+      "Liste les batteries",
+      "Affiche la réserve de puissance",
     ],
     icon: "solar",
     tag: "PRODUIRE",
