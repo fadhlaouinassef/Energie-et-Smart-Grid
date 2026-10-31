@@ -18,6 +18,10 @@ Sous PowerShell, si `npm.ps1` est bloqué, utiliser `npm.cmd`.
 - `npm run preview` : aperçu de la compilation.
 - `npm run lint` : vérification avec Oxlint.
 
+## Architecture
+
+![Architecture du projet](./ARCHITECTURE.png)
+
 ## Page d’accueil
 
 React et CSS avec Tailwind déjà configuré. Palette vert électrique (`#c5f36b`), vert forêt (`#203c2f`) et blanc cassé (`#fafbf6`). Les couleurs principales sont définies dans `src/index.css`.
